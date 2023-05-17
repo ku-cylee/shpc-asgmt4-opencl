@@ -12,7 +12,7 @@
     exit(EXIT_FAILURE);                                                        \
   }
 
-#define TILE_SIZE 32
+#define GROUP_WIDTH 32
 
 static cl_int err;
 static cl_platform_id platform;
@@ -49,12 +49,11 @@ void matmul(const float *A, const float *B, float *C, int M, int N, int K) {
   CHECK_ERROR(err);
 
   size_t global_work_size[2] = { M, N };
-  size_t local_work_size[2] = { TILE_SIZE, TILE_SIZE };
+  size_t local_work_size[2] = { GROUP_WIDTH, GROUP_WIDTH };
 
   for (int i = 0; i < 2; i++) {
-    size_t glb = global_work_size[i];
     size_t lcl = local_work_size[i];
-    global_work_size[i] = (glb + lcl - 1) / lcl * lcl;
+    global_work_size[i] = (global_work_size[i] + lcl - 1) / lcl * lcl;
   }
 
   err = clEnqueueNDRangeKernel(
