@@ -1,10 +1,11 @@
 #define TILE_SIZE     32
 #define VECTOR_SIZE   16
+#define VECTOR        float16
 
 __kernel void sgemm(
-  __global float16 *A,
-  __global float16 *B,
-  __global float16 *C,
+  __global VECTOR *A,
+  __global VECTOR *B,
+  __global VECTOR *C,
   int M, int N, int K) {
 
   int k, t, v;
@@ -14,13 +15,10 @@ __kernel void sgemm(
   int global_row = TILE_SIZE * get_group_id(0) + local_row;
   int global_col = (TILE_SIZE / VECTOR_SIZE) * get_group_id(1) + local_col;
 
-  __local float16 A_tile[TILE_SIZE][TILE_SIZE / VECTOR_SIZE];
-  __local float16 B_tile[TILE_SIZE][TILE_SIZE / VECTOR_SIZE];
+  __local VECTOR A_tile[TILE_SIZE][TILE_SIZE / VECTOR_SIZE];
+  __local VECTOR B_tile[TILE_SIZE][TILE_SIZE / VECTOR_SIZE];
 
-  float16 sum_vec = {
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-  };
+  VECTOR sum_vec = (VECTOR) 0.0f;
 
   for (k = 0; k < K; k += TILE_SIZE) {
     int tile_row = k + local_row;
@@ -32,9 +30,8 @@ __kernel void sgemm(
     barrier(CLK_LOCAL_MEM_FENCE);
 
     float *A_vec_arr;
-    float16 A_vec, B_vec;
+    VECTOR A_vec, B_vec;
     for (t = 0; t < TILE_SIZE / VECTOR_SIZE; t++) {
-      // A_vec_arr = (float *)&A_tile[local_row][t];
       A_vec = A_tile[local_row][t];
       A_vec_arr = (float *)&A_vec;
       for (v = 0; v < VECTOR_SIZE; v++) {
