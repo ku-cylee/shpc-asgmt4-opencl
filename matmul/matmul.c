@@ -12,7 +12,8 @@
     exit(EXIT_FAILURE);                                                        \
   }
 
-#define GROUP_WIDTH 32
+#define GROUP_WIDTH   32
+#define VECTOR_SIZE   16
 
 static cl_int err;
 static cl_platform_id platform;
@@ -48,8 +49,8 @@ void matmul(const float *A, const float *B, float *C, int M, int N, int K) {
   err = clSetKernelArg(kernel, 5, sizeof(int), &K);
   CHECK_ERROR(err);
 
-  size_t global_work_size[2] = { M, N };
-  size_t local_work_size[2] = { GROUP_WIDTH, GROUP_WIDTH };
+  size_t global_work_size[2] = { M, N / VECTOR_SIZE };
+  size_t local_work_size[2] = { GROUP_WIDTH, GROUP_WIDTH / VECTOR_SIZE };
 
   for (int i = 0; i < 2; i++) {
     size_t lcl = local_work_size[i];
