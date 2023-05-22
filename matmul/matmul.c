@@ -30,6 +30,7 @@ void matmul(const float *A, const float *B, float *C, int M, int N, int K) {
     0, M * K * sizeof(float), A,
     0, NULL, NULL);
   CHECK_ERROR(err);
+
   err = clEnqueueWriteBuffer(
     queue, b_d, CL_TRUE,
     0, K * N * sizeof(float), B,
@@ -171,11 +172,11 @@ void matmul_initialize(int M, int N, int K) {
 }
 
 void matmul_finalize() {
-  clReleaseContext(context);
-  clReleaseCommandQueue(queue);
-  clReleaseProgram(program);
-  clReleaseKernel(kernel);
   clReleaseMemObject(a_d);
   clReleaseMemObject(b_d);
   clReleaseMemObject(c_d);
+  clReleaseKernel(kernel);
+  clReleaseProgram(program);
+  clReleaseCommandQueue(queue);
+  clReleaseContext(context);
 }
